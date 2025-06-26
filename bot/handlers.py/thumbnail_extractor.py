@@ -27,17 +27,21 @@ async def process_thumbnail_video(update: Update, context: ContextTypes.DEFAULT_
         await update.message.reply_text("Please send a valid video file.")
         return
     
-    # Create directories
-    os.makedirs(Config.DOWNLOAD_PATH, exist_ok=True)
-    os.makedirs(Config.THUMBNAIL_DIR, exist_ok=True)
+    # Get absolute paths
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))
+    download_path = os.path.join(base_dir, Config.DOWNLOAD_PATH)
+    thumbnail_dir = os.path.join(base_dir, Config.THUMBNAIL_DIR)
+    
+    os.makedirs(download_path, exist_ok=True)
+    os.makedirs(thumbnail_dir, exist_ok=True)
     
     # Download video
     video_file = await video.get_file()
-    video_path = os.path.join(Config.DOWNLOAD_PATH, video_file.file_id + ".mp4")
+    video_path = os.path.join(download_path, video_file.file_id + ".mp4")
     await video_file.download_to_drive(video_path)
     
     # Extract thumbnail
-    thumbnail_path = extract_thumbnail(video_path, Config.THUMBNAIL_DIR)
+    thumbnail_path = extract_thumbnail(video_path, thumbnail_dir)
     
     if thumbnail_path:
         await update.message.reply_photo(
