@@ -2,12 +2,13 @@ import os
 import subprocess
 import logging
 from config import Config
-from utils.helpers import get_media_info
 
 logger = logging.getLogger(__name__)
 
 def extract_thumbnail(video_path, output_dir):
+    """Extract a single thumbnail frame from the video."""
     try:
+        os.makedirs(output_dir, exist_ok=True)
         output_path = os.path.join(output_dir, "thumbnail.jpg")
         cmd = [
             Config.FFMPEG_PATH,
@@ -17,36 +18,40 @@ def extract_thumbnail(video_path, output_dir):
             "-q:v", "2",
             output_path
         ]
-        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return output_path
     except Exception as e:
-        logger.error(f"Thumbnail extraction failed: {str(e)}")
+        logger.error(f"Thumbnail extraction failed: {e}")
         return None
 
 def edit_metadata(input_path, output_path, metadata):
+    """
+    Edit stream metadata (title/language) using FFmpeg.
+    Supports multiple audio/subtitle streams.
+    """
     try:
-        cmd = [Config.FFMPEG_PATH, "-i", input_path]
+        cmd = [Config.FFMPEG_PATH, "-i", input_path, "-map", "0"]
         
         for i, meta in enumerate(metadata):
-            if meta.get('title') or meta.get('language'):
-                cmd.extend(["-metadata", f"{meta['type']}:{i}={meta.get('title','')}"])
-                if meta.get('language'):
-                    cmd.extend(["-metadata", f"{meta['type']}:{i}:language={meta['language']}"])
-        
+            if meta.get('title'):
+                cmd.extend(["-metadata:s:{}:{}".format(meta['type'][0], i), f"title={meta['title']}"])
+            if meta.get('language'):
+                cmd.extend(["-metadata:s:{}:{}".format(meta['type'][0], i), f"language={meta['language']}"])
+
         cmd.extend(["-c", "copy", output_path])
-        
-        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return output_path
     except Exception as e:
-        logger.error(f"Metadata editing failed: {str(e)}")
+        logger.error(f"Metadata editing failed: {e}")
         return None
 
 def merge_videos(video_paths, output_path):
+    """Merge multiple videos using FFmpeg concat demuxer."""
     try:
         list_path = os.path.join(Config.UPLOAD_PATH, "filelist.txt")
         with open(list_path, "w") as f:
             for path in video_paths:
-                f.write(f"file '{os.path.basename(path)}'\n")
+                f.write(f"file '{path}'\n")
         
         cmd = [
             Config.FFMPEG_PATH,
@@ -56,13 +61,14 @@ def merge_videos(video_paths, output_path):
             "-c", "copy",
             output_path
         ]
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return output_path
     except Exception as e:
-        logger.error(f"Video merging failed: {str(e)}")
+        logger.error(f"Video merging failed: {e}")
         return None
 
 def trim_video(input_path, output_path, start_time, end_time):
+    """Trim a video using start and end time."""
     try:
         cmd = [
             Config.FFMPEG_PATH,
@@ -72,21 +78,23 @@ def trim_video(input_path, output_path, start_time, end_time):
             "-c", "copy",
             output_path
         ]
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return output_path
     except Exception as e:
-        logger.error(f"Video trimming failed: {str(e)}")
+        logger.error(f"Video trimming failed: {e}")
         return None
 
-def convert_video(input_path, output_path, format):
+def convert_video(input_path, output_path):
+    """Convert video to a different format based on the output file extension."""
     try:
         cmd = [
             Config.FFMPEG_PATH,
             "-i", input_path,
+            "-preset", "fast",  # optional: speeds up processing
             output_path
         ]
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         return output_path
     except Exception as e:
-        logger.error(f"Video conversion failed: {str(e)}")
+        logger.error(f"Video conversion failed: {e}")
         return None
