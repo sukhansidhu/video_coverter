@@ -8,7 +8,7 @@ RUN apt-get update && \
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV BOT_TOKEN=$BOT_TOKEN
-ENV PYTHONPATH=/app/src
+ENV PYTHONPATH=/app/bot
 
 WORKDIR /app
 
@@ -17,6 +17,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p src/downloads src/uploads src/thumbnails src/metadata
+RUN mkdir -p bot/downloads bot/uploads bot/thumbnails bot/metadata
 
-CMD python src/main.py
+CMD python -m bot.main
