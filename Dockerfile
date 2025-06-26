@@ -7,12 +7,9 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-# Copy requirements
 COPY requirements.txt .
-
-# Copy everything from `bot/` (where handlers/ and main.py live) into /app
-COPY bot/ .
-
 RUN pip install --no-cache-dir -r requirements.txt
+
+COPY bot/ .
 
 CMD ["python", "main.py"]
