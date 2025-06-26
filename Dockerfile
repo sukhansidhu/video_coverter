@@ -7,7 +7,7 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-COPY . /app
+COPY bot/ /app
 
 RUN pip install --no-cache-dir -r requirements.txt
 
