@@ -13,3 +13,4 @@ class Config:
     THUMBNAIL_DIR = os.getenv("THUMBNAIL_DIR", "thumbnails")
     METADATA_DIR = os.getenv("METADATA_DIR", "metadata")
     FFMPEG_PATH = os.getenv("FFMPEG_PATH", "ffmpeg")
+    
