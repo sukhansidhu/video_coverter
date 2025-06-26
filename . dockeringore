@@ -1,10 +1,12 @@
-__pycache__
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
 .env
 .DS_Store
-downloads/
-uploads/
-thumbnails/
-metadata/
+
+# Only ignore content, not folders
+downloads/*
+uploads/*
+thumbnails/*
+metadata/*
