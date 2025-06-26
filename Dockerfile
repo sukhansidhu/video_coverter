@@ -8,7 +8,6 @@ RUN apt-get update && \
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV BOT_TOKEN=$BOT_TOKEN
-ENV PYTHONPATH=/app/bot
 
 WORKDIR /app
 
@@ -19,4 +18,4 @@ COPY . .
 
 RUN mkdir -p bot/downloads bot/uploads bot/thumbnails bot/metadata
 
-CMD python -m bot.main
+CMD ["python", "bot/main.py"]
