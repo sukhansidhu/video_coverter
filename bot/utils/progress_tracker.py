@@ -17,47 +17,53 @@ class ProgressTracker:
         self.completed = False
 
     def update_progress(self, chunk_size):
-        current_time = time.time()
         self.downloaded += chunk_size
-        
-        # Update progress every 1 second
-        if current_time - self.last_update_time >= 1:
-            percentage = (self.downloaded / self.total_size) * 100
-            elapsed_time = current_time - self.start_time
-            speed = self.downloaded / elapsed_time if elapsed_time > 0 else 0
-            remaining_bytes = self.total_size - self.downloaded
-            time_left = remaining_bytes / speed if speed > 0 else 0
-            
-            progress_bar = '[' + '■' * int(percentage / 5) + '□' * (20 - int(percentage / 5)) + ']'
-            text = (
-                "Video Converter New\n\n"
-                f"Downloading.... from DC1\n\n"
-                f"{progress_bar}\n\n"
-                f"Downloaded: {get_file_size(self.downloaded)} / {get_file_size(self.total_size)} ({percentage:.1f}%)\n"
-                f"Speed: {get_file_size(speed)}/s\n"
-                f"Time Left: {time_left:.1f}s\n\n"
-                "OK"
-            )
-            
-            try:
-                self.context.bot.edit_message_text(
-                    chat_id=self.update.effective_chat.id,
-                    message_id=self.message_id,
-                    text=text
-                )
-            except Exception:
-                pass
-            
-            self.last_update_time = current_time
+        current_time = time.time()
 
-    def complete(self):
-        self.completed = True
-        text = "Processing time depends on file size. So please wait..."
+        # Only update every 1 second
+        if current_time - self.last_update_time < 1:
+            return
+
+        percentage = (self.downloaded / self.total_size) * 100
+        elapsed_time = current_time - self.start_time
+        speed = self.downloaded / elapsed_time if elapsed_time > 0 else 0
+        remaining = self.total_size - self.downloaded
+        time_left = remaining / speed if speed > 0 else 0
+
+        # Build visual progress bar
+        filled = int(percentage / 5)
+        empty = 20 - filled
+        progress_bar = '▰' * filled + '▱' * empty
+
+        text = (
+            "📥 <b>Downloading Video</b>\n"
+            "🔄 <i>From: DC1</i>\n\n"
+            f"<code>{progress_bar}</code>\n\n"
+            f"✅ Downloaded: <b>{get_file_size(self.downloaded)} / {get_file_size(self.total_size)}</b>\n"
+            f"🚀 Speed: <b>{get_file_size(speed)}/s</b>\n"
+            f"⏳ ETA: <b>{time_left:.1f} seconds</b>\n\n"
+            "Please wait..."
+        )
+
         try:
             self.context.bot.edit_message_text(
                 chat_id=self.update.effective_chat.id,
                 message_id=self.message_id,
-                text=text
+                text=text,
+                parse_mode='HTML'
+            )
+        except Exception as e:
+            pass  # Avoid flooding logs or halting on edit errors
+
+        self.last_update_time = current_time
+
+    def complete(self):
+        self.completed = True
+        try:
+            self.context.bot.edit_message_text(
+                chat_id=self.update.effective_chat.id,
+                message_id=self.message_id,
+                text="✅ Download completed. Processing video now..."
             )
         except Exception:
             pass
