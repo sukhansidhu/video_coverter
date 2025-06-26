@@ -1,9 +1,9 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CallbackQueryHandler
-from utils.buttons import main_menu_keyboard, caption_editor_keyboard, progress_keyboard, cancel_keyboard
-from handlers.thumbnail_extractor import handle_thumbnail_request
-from handlers.caption_editor import handle_caption_editor
-from handlers.metadata_editor import start_metadata_editor
+from utils.buttons import main_menu_keyboard
+from .thumbnail_extractor import handle_thumbnail_request
+from .caption_editor import handle_caption_editor
+from .metadata_editor import start_metadata_editor
 
 async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
