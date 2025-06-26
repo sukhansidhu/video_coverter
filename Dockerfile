@@ -7,13 +7,12 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-# Copy requirements.txt from root
-COPY requirements.txt /app/requirements.txt
+# Copy requirements
+COPY requirements.txt .
 
-# Copy bot code from /bot into /app
-COPY bot/ /app/
+# Copy everything from `bot/` (where handlers/ and main.py live) into /app
+COPY bot/ .
 
-# Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 CMD ["python", "main.py"]
